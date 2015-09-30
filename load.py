@@ -4,7 +4,7 @@ Created September 28, 2015
 @author Rachel Ehrlich
 '''
 # import urllib2
-from py2neo import cypher, Graph, Relationship
+from py2neo import Graph, Relationship
 import re
 
 def parse_line(graph, line):
@@ -37,7 +37,12 @@ def add_constraints(graph):
         except:
             pass
 
+def add_knows_edges(graph):
+    graph.cypher.execute("MATCH (a:Character)-[:IS_IN]->(i)<-[:IS_IN]-(b:Character) \
+    WHERE ID(a) < ID(b) WITH a, b, count(i) AS issues \
+    CREATE (a)-[:KNOWS {common_issues: issues}]->(b)")
+
 graph = Graph()
 add_constraints(graph)
 read_character_issues(graph)
-
+add_knows_edges(graph)
